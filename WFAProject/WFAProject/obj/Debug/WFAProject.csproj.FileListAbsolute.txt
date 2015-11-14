@@ -1,1 +1,2 @@
 c:\users\user\documents\visual studio 2015\Projects\WFAProject\WFAProject\bin\Debug\WFAProject.exe.config
+C:\Users\User\Documents\GitHub\WFAProject\WFAProject\WFAProject\bin\Debug\WFAProject.exe.config

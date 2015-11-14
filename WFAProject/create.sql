@@ -15,6 +15,7 @@ IF OBJECT_ID('dbo.TItems', 'U') IS NOT NULL
   DROP TABLE [dbo].[TItems]; 
 GO
 
+
 /********** CREATE TElements TABLE ->**********/
 CREATE TABLE [dbo].[TElements](
 	[Id_Element] [uniqueidentifier] ROWGUIDCOL  NOT NULL,
@@ -56,8 +57,26 @@ GO
 
 
 
+
+
+
+
+
 INSERT INTO [dbo].[TElements] (Name) VALUES ('First')
 INSERT INTO [dbo].[TElements] (Name) VALUES ('Second')
 INSERT INTO [dbo].[TElements] (Name, Parent_id) VALUES ('1.1',(SELECT Id_Element FROM TElements WHERE Name = 'First'))
 INSERT INTO [dbo].[TElements] (Name, Parent_id) VALUES ('1.2',(SELECT Id_Element FROM TElements WHERE Name = 'First'))
 INSERT INTO [dbo].[TElements] (Name, Parent_id) VALUES ('1.2.1',(SELECT Id_Element FROM TElements WHERE Name = '1.2'))
+GO
+
+DECLARE @val UNIQUEIDENTIFIER
+SET @val = (SELECT TOP 1 Id_Element FROM TElements WHERE Name = 'First')
+EXEC CopyElementsToItems @val;
+GO
+
+DECLARE @val UNIQUEIDENTIFIER
+SET @val = (SELECT TOP 1 Id_Element FROM TElements WHERE Name = '1.2.1')
+DECLARE @val1 UNIQUEIDENTIFIER
+SET @val1 = (SELECT TOP 1 Id_Item FROM TItems WHERE Name = '1.1')
+EXEC CopyElementsToItems @val, @val1;
+GO

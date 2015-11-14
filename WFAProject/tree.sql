@@ -1,15 +1,20 @@
 USE DBProject
 GO
-DECLARE @Id_Filtr uniqueidentifier;
-DECLARE @Id_Parent uniqueidentifier;
 
-SET @Id_Filtr = (SELECT TOP 1 Id_Element FROM TElements WHERE Name = 'First');
+IF OBJECT_ID('CopyElementsToItems', 'P') IS NULL
+	exec('CREATE PROCEDURE [dbo].[CopyElementsToItems] AS BEGIN SET NOCOUNT ON; END')
+GO
 
-WITH DirectReports(Id_Element, Parent_ID, Name) AS 
+ALTER PROCEDURE [dbo].[CopyElementsToItems]
+	@Id_what uniqueidentifier,
+	@Id_where uniqueidentifier = NULL
+AS 
+BEGIN
+/*WITH DirectReports(Id_Element, Parent_ID, Name) AS 
 (
     SELECT Id_Element, Parent_Id, Name
     FROM TElements
-    WHERE Id_Element = @Id_Filtr
+    WHERE Id_Element = @Id_what
     UNION ALL
     SELECT e.Id_Element, e.Parent_id, e.Name
     FROM TElements e
@@ -19,10 +24,7 @@ WITH DirectReports(Id_Element, Parent_ID, Name) AS
 SELECT Id_Element, Parent_ID, Name
 INTO #T
 FROM DirectReports 
-
-SELECT *
-FROM #T
-
+*/
 DECLARE @TT TABLE (
 	[Id_Item] [uniqueidentifier],
 	[Name] [varchar](64) NOT NULL,
@@ -30,15 +32,17 @@ DECLARE @TT TABLE (
 	[Parent_Id] [uniqueidentifier]
 )
 
+INSERT INTO #T EXEC GetChildrenElements @Id_what
+
 INSERT INTO @TT (Id_Item, Name, Element_Id) SELECT NewID(), Name, Id_Element FROM #T
 
-SELECT *
-FROM @TT
 
-SELECT tab1.Id_Item, tab1.Name, tab1.Element_Id, tab2.Id_Item as Parent_Id
+INSERT INTO TItems (Id_Item, Name, Element_Id, Parent_Id)
+SELECT tab1.Id_Item, tab1.Name, tab1.Element_Id, IsNull(tab2.Id_Item, @Id_where) as Parent_Id
 FROM @TT tab1 LEFT JOIN (SELECT tab.Id_Item, #T.Id_Element
 							FROM @TT tab, #T
 							WHERE #T.Parent_ID = tab.Element_Id) tab2
 							ON tab1.Element_Id = tab2.Id_Element
 
 DROP TABLE #T
+END;
