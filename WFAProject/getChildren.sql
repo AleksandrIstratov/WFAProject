@@ -75,16 +75,3 @@ FROM #T
 END
 GO
 
-DECLARE @val UNIQUEIDENTIFIER
-SET @val = (SELECT TOP 1 Id_Item FROM TItems WHERE Name = '1.1')
-select @val
-EXEC GetChildrenItems @val
-
-GO
-
-DECLARE @val UNIQUEIDENTIFIER
-SET @val = (SELECT TOP 1 Id_Element FROM TElements WHERE Name = 'First')
-select @val
-EXEC GetChildrenElements @val
-
-GO
